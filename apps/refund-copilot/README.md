@@ -26,6 +26,35 @@ Screenshots from demo mode; `npm run screenshots` regenerates them.
 | **Ask** | answers questions about orders and refunds, citing its sources | finds the relevant records first, by exact match and by meaning ([`retrieve.ts`](server/lib/retrieve.ts), [`semantic.ts`](server/lib/semantic.ts)), then removes any source the model invented | read the answer and its sources |
 | **Bulk refunds** | suggests refunds for a group, like "every parcel that never arrived" | checks every suggestion against the same policy | pick which ones to create |
 
+## System design
+
+Every request passes the same gate; manual actions go straight to the rules, AI features go through privacy, the model and a check on its answer first. Nothing the model returns reaches the store without passing the rules, and every step logs under the request's trace id.
+
+```mermaid
+flowchart TB
+  browser["Browser · React UI"] -->|"HTTPS · session cookie · trace id"| gate
+
+  gate["Gate, in order<br/>JSON only → signed session → kill switch<br/>→ rate limit → daily AI budget"]
+
+  gate -->|"create · approve · reject"| rules
+  gate -->|"read · ask · bulk"| retrieval
+
+  subgraph aipath["AI path"]
+    retrieval["Retrieval, Ask only<br/>exact signals + meaning"] --> privacy["Privacy<br/>redact PII · pseudonyms"]
+    privacy --> model["Model client<br/>Anthropic or Bedrock · canary"]
+    model --> check["Check the answer<br/>Zod schema · citations"]
+  end
+
+  retrieval <-.-> embed["Voyage embeddings"]
+  check --> rules["Rules<br/>price from the order · policy · roles · four eyes"]
+  rules <--> store[("Store<br/>orders · refunds · audit history")]
+  rules --> outcomes["Outcomes<br/>feedback · edits · failures"]
+
+  gate -.-> logs[["Logs joined by trace id"]]
+  model -.-> logs
+  outcomes -.-> logs
+```
+
 ## What the model never decides
 
 - **Who the customer is.** That comes from the email's sender address, not from what the message claims.

@@ -30,6 +30,8 @@ flowchart LR
   ci -.-> product
 ```
 
+How one request moves through the app, step by step: [system design](apps/refund-copilot/README.md#system-design).
+
 ## What it does
 
 - **Reads requests.** An email or receipt photo becomes a refund draft. The model names the order, items and reason; code sets the price and checks the policy.
