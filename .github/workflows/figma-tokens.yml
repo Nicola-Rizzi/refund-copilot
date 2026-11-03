@@ -1,0 +1,46 @@
+name: Publish tokens to Figma
+
+# Code → Figma, one way. tokens.json is the source of truth; after it changes on
+# main (so it has passed the PR checks: contrast, regenerated CSS, tests), this
+# publishes it as variables in the team's Figma file, where designers use the same
+# values and Dev Mode shows developers the CSS variable to write.
+#
+# Needs two repo secrets: FIGMA_TOKEN (scopes file_variables:read + file_variables:write;
+# the Variables API is for full members of Enterprise orgs) and FIGMA_FILE_KEY.
+# Without them the job skips with a notice instead of failing.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - packages/ui/src/tokens.json
+      - packages/ui/scripts/css-variables.js
+      - scripts/figma-publish-tokens.js
+      - scripts/lib/figma-tokens.mjs
+  workflow_dispatch:
+
+concurrency:
+  group: figma-tokens
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+      FIGMA_FILE_KEY: ${{ secrets.FIGMA_FILE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # No npm ci: the script uses Node built-ins and fetch only.
+      - name: Publish (code-owned collection; variables the code dropped are deleted)
+        run: |
+          if [ -z "$FIGMA_TOKEN" ] || [ -z "$FIGMA_FILE_KEY" ]; then
+            echo "::notice::FIGMA_TOKEN / FIGMA_FILE_KEY not set: skipping the Figma publish."
+            exit 0
+          fi
+          node scripts/figma-publish-tokens.js --publish --prune

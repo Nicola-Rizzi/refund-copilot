@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck (refund-copilot-mcp)
+        run: npm run build --workspace packages/mcp-server
+
+      - name: Typecheck (refund-copilot)
+        run: npx tsc -b --noEmit
+        working-directory: apps/refund-copilot
+
+      # Root config: the project's design-system rules over packages/ui/src and
+      # apps/ui-docs. The app has its own richer config with the React plugins.
+      - name: Lint (root — design-system rules)
+        run: npm run lint
+
+      - name: Lint (refund-copilot)
+        run: npm run lint --workspace apps/refund-copilot
+
+      # Delegates to every workspace's own "test" script (--if-present skips
+      # packages/ui, which doesn't define one). Same command a clone runs
+      # locally — the CI can't silently drift from what's on the README.
+      - name: Test all workspaces
+        run: npm test
+
+      # scripts/ isn't a workspace, so npm test doesn't reach it.
+      - name: Test build scripts
+        run: npm run test:scripts
+
+      # Offline — no ANTHROPIC_API_KEY. Each eval passes a faithful stub and fails a
+      # misled one (incl. the prompt-injection email and an unasked Bulk proposal);
+      # the latency/cost budgets fail a slow or costly stub and an unmeasured feature.
+      - name: Refund copilot eval self-test
+        run: npm run eval:extract:selftest --workspace apps/refund-copilot
+
+      # End to end: Chromium against the real UI and API server, with AI_STUB=1 in place
+      # of the model (no key). Includes axe in the real browser, which measures contrast.
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/refund-copilot
+
+      - name: End-to-end tests
+        run: npm run test:e2e --workspace apps/refund-copilot
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/refund-copilot/test-results/
+          retention-days: 7
+
+      # Rule 4: every file path and `npm run` script a doc mentions must exist.
+      - name: Docs reference check
+        run: node .claude/skills/docs-sync/check-docs.mjs
+

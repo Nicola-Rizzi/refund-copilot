@@ -1,0 +1,40 @@
+name: Generated artifact drift check
+
+# packages/ui/README.md and apps/ui-docs/stories/*.stories.tsx are both
+# generated from live MCP output. A component-source change that doesn't rerun
+# the generators leaves them stale; this fails the PR if so.
+on:
+  pull_request:
+    paths:
+      - 'packages/ui/src/**'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Both generators spawn the built MCP server over stdio.
+      - name: Build the MCP server
+        run: npm run build --workspace packages/mcp-server
+
+      - name: Regenerate from live MCP output
+        run: |
+          node scripts/generate-docs.js
+          node scripts/generate-stories.js
+
+      - name: Fail if any generated artifact is stale
+        run: |
+          if ! git diff --exit-code packages/ui/README.md apps/ui-docs/stories/; then
+            echo ""
+            echo "ERROR: a component source changed but a generated artifact was not regenerated."
+            echo "Run 'node scripts/generate-docs.js' and 'node scripts/generate-stories.js', then commit."
+            exit 1
+          fi

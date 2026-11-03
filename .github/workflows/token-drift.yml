@@ -1,0 +1,31 @@
+name: Token drift check
+
+on:
+  pull_request:
+    paths:
+      - 'packages/ui/src/tokens.json'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Regenerate index.css from tokens.json
+        run: node packages/ui/scripts/generate-tokens.js
+
+      - name: Fail if index.css is stale
+        run: |
+          if ! git diff --exit-code packages/ui/src/index.css; then
+            echo ""
+            echo "ERROR: tokens.json was changed but index.css was not regenerated."
+            echo "Run 'npm run generate-tokens' and commit the updated index.css."
+            exit 1
+          fi

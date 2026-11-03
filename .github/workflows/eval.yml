@@ -1,0 +1,28 @@
+name: Evals on the real model
+
+# Manual only (Actions → "Evals on the real model" → Run workflow): every run calls
+# the Anthropic API and costs a few cents, so it never fires on its own. CI already
+# runs the offline self-tests on every PR; this answers "does the real model still
+# pass?" after a prompt, schema or model change.
+on:
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Refund copilot eval (reading, injection email, Ask + Bulk, latency and cost budgets)
+        run: npm run eval:extract --workspace apps/refund-copilot
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

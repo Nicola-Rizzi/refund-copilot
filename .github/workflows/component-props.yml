@@ -1,0 +1,30 @@
+name: Component prop verification
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '**/*.tsx'
+      - '**/*.jsx'
+      - 'packages/mcp-server/src/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build refund-copilot-mcp
+        run: npm run build --workspace=packages/mcp-server
+
+      - name: Verify component prop values against the live MCP API
+        run: git diff origin/main...HEAD | node scripts/verify-component-props.js

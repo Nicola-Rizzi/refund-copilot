@@ -1,0 +1,34 @@
+name: Endpoint field verification
+
+# The Rule 2 analogue of component-props.yml. Fails the check if the Refund type
+# or any api()/apiStream() call in apps/refund-copilot drifts from the live
+# get_endpoint contract. Deterministic — a straight string comparison.
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'apps/refund-copilot/src/**/*.ts'
+      - 'apps/refund-copilot/src/**/*.tsx'
+      - 'apps/refund-copilot/api.json'
+      - 'packages/mcp-server/src/**'
+      - 'scripts/verify-endpoint-fields.js'
+      - 'scripts/lib/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build refund-copilot-mcp
+        run: npm run build --workspace=packages/mcp-server
+
+      - name: Verify endpoint fields against the live MCP contract
+        run: node scripts/verify-endpoint-fields.js

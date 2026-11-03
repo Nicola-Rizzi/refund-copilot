@@ -1,0 +1,16 @@
+{
+  // Type-checks the Figma publish plan against Figma's official API types
+  // (@figma/rest-api-spec). Run by `npm run test:scripts`; emits nothing.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "files": ["lib/figma-tokens.mjs"]
+}
