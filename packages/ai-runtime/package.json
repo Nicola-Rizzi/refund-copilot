@@ -1,0 +1,31 @@
+{
+  "name": "@refund-copilot/ai-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared server runtime for the AI features: model client seam, usage/cost logging, trace ids, kill switch, rate limit, per-user spend cap, gradual model release, Voyage embeddings.",
+  "exports": {
+    "./anthropicClient": "./src/anthropicClient.ts",
+    "./usage": "./src/usage.ts",
+    "./observability": "./src/observability.ts",
+    "./rateLimit": "./src/rateLimit.ts",
+    "./clientIp": "./src/clientIp.ts",
+    "./types": "./src/types.ts",
+    "./spend": "./src/spend.ts",
+    "./rollout": "./src/rollout.ts",
+    "./embeddings": "./src/embeddings.ts"
+  },
+  "scripts": {
+    "test": "tsc --noEmit && vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.36.0",
+    "@anthropic-ai/sdk": "^0.137.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.2",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.5"
+  }
+}
