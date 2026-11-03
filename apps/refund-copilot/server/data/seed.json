@@ -1,0 +1,36 @@
+{
+  "shop": "Nordlys Home",
+  "currency": "EUR",
+  "policy": { "returnWindowDays": 30, "lostAfterDays": 7, "agentLimit": 100, "historyWindowDays": 90, "historyWarnAt": 2 },
+  "users": [
+    { "id": "luca", "name": "Luca Bianchi", "role": "agent" },
+    { "id": "sara", "name": "Sara Holm", "role": "agent" },
+    { "id": "elena", "name": "Elena Conti", "role": "supervisor" }
+  ],
+  "orders": [
+    { "id": "ORD-1042", "customerEmail": "mario.rossi@example.com", "status": "delivered", "shippedDaysAgo": 8, "deliveredDaysAgo": 5, "shipping": 4.90,
+      "items": [ { "sku": "VAS-CER-01", "name": "Ceramic vase, sand", "qty": 1, "unitPrice": 39.90 },
+                 { "sku": "NAP-LIN-04", "name": "Linen napkins, set of 4", "qty": 2, "unitPrice": 24.00 } ] },
+    { "id": "ORD-1043", "customerEmail": "giulia.ferri@example.com", "status": "delivered", "shippedDaysAgo": 15, "deliveredDaysAgo": 12, "shipping": 0,
+      "items": [ { "sku": "TBL-OAK-S", "name": "Oak side table", "qty": 1, "unitPrice": 189.00 } ] },
+    { "id": "ORD-1044", "customerEmail": "k.jensen@example.com", "status": "delivered", "shippedDaysAgo": 48, "deliveredDaysAgo": 45, "shipping": 4.90,
+      "items": [ { "sku": "THR-WOL-GR", "name": "Wool throw, grey", "qty": 1, "unitPrice": 79.00 } ] },
+    { "id": "ORD-1045", "customerEmail": "alex.moreau@example.com", "status": "shipped", "shippedDaysAgo": 12, "deliveredDaysAgo": null, "shipping": 4.90,
+      "items": [ { "sku": "CUP-ESP-6", "name": "Espresso cups, set of 6", "qty": 1, "unitPrice": 32.00 } ] },
+    { "id": "ORD-1046", "customerEmail": "mario.rossi@example.com", "status": "delivered", "shippedDaysAgo": 23, "deliveredDaysAgo": 20, "shipping": 0,
+      "items": [ { "sku": "LMP-DSK-BR", "name": "Desk lamp, brass", "qty": 1, "unitPrice": 59.00 } ] },
+    { "id": "ORD-1047", "customerEmail": "mario.rossi@example.com", "status": "delivered", "shippedDaysAgo": 64, "deliveredDaysAgo": 60, "shipping": 4.90,
+      "items": [ { "sku": "MUG-STN-2", "name": "Stoneware mugs, pair", "qty": 1, "unitPrice": 22.00 } ] }
+  ],
+  "refunds": [
+    { "id": "RF-2001", "orderId": "ORD-1046", "customerEmail": "mario.rossi@example.com", "reason": "damaged",
+      "items": [ { "sku": "LMP-DSK-BR", "qty": 1 } ], "refundShipping": false, "amount": 59.00,
+      "createdBy": "sara", "createdDaysAgo": 15, "status": "approved", "approvedBy": "sara", "checks": [] },
+    { "id": "RF-2002", "orderId": "ORD-1047", "customerEmail": "mario.rossi@example.com", "reason": "damaged",
+      "items": [ { "sku": "MUG-STN-2", "qty": 1 } ], "refundShipping": false, "amount": 22.00,
+      "createdBy": "luca", "createdDaysAgo": 50, "status": "approved", "approvedBy": "luca", "checks": [] },
+    { "id": "RF-2003", "orderId": "ORD-1043", "customerEmail": "giulia.ferri@example.com", "reason": "damaged",
+      "items": [ { "sku": "TBL-OAK-S", "qty": 1 } ], "refundShipping": false, "amount": 189.00,
+      "createdBy": "luca", "createdDaysAgo": 1, "status": "pending_approval", "approvedBy": null, "checks": [] }
+  ]
+}

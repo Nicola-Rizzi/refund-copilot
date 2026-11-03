@@ -1,0 +1,215 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/accounts",
+    "description": "Public: the demo accounts to sign in as, and the shop name. No session needed.",
+    "response": {
+      "users": "array of { id, name, role: 'agent' | 'supervisor' }",
+      "shop": "string"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/session",
+    "description": "Public: sign in as a demo account. Sets the session cookie (rc_session: HttpOnly, SameSite=Strict, Secure in production, 8 h, HMAC-signed). 401 for an unknown account. Also how the UI switches account.",
+    "body": {
+      "userId": "string"
+    },
+    "response": {
+      "user": "object { id, name, role }"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/session/logout",
+    "description": "Public: sign out. Clears the session cookie.",
+    "body": {},
+    "response": {
+      "ok": "boolean"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/me",
+    "description": "The signed-in user (from the session cookie), every user for the account switcher, the shop name, its refund policy, and aiStub (true when AI_STUB=1: AI answers come from keyword rules, not a model). Every route except /api/accounts and /api/session needs a valid session: 401 without one. Every POST must be Content-Type: application/json (415 otherwise).",
+    "response": {
+      "user": "object { id, name, role: 'agent' | 'supervisor' }",
+      "users": "array of user",
+      "shop": "string",
+      "policy": "object { returnWindowDays, lostAfterDays, agentLimit, historyWindowDays, historyWarnAt }",
+      "aiStub": "boolean"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/orders",
+    "description": "Every order. Wrapped in { orders } — not a bare array.",
+    "response": {
+      "orders": {
+        "type": "array",
+        "items": {
+          "id": "string, e.g. ORD-1042",
+          "customerEmail": "string",
+          "status": "'delivered' | 'shipped'",
+          "shippedDaysAgo": "number",
+          "deliveredDaysAgo": "number | null",
+          "shipping": "number (EUR)",
+          "items": "array of { sku, name, qty, unitPrice }",
+          "shippedAt": "string date (optional)",
+          "deliveredAt": "string date | null (optional)"
+        }
+      }
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/refunds",
+    "description": "Every refund, newest first, each with approveBlocker: why the acting user can't approve it (null if they can). Wrapped in { refunds }.",
+    "response": {
+      "refunds": {
+        "type": "array",
+        "items": {
+          "id": "string, e.g. RF-2003",
+          "orderId": "string",
+          "customerEmail": "string",
+          "reason": "'damaged' | 'wrong_item' | 'not_received' | 'changed_mind' | 'late_delivery' | 'other'",
+          "amount": "number (EUR, computed by the server from the order — never sent by the client)",
+          "items": "array of { sku, qty }",
+          "refundShipping": "boolean",
+          "createdBy": "string (user id)",
+          "createdAt": "string date",
+          "status": "'pending_approval' | 'approved' | 'rejected' | 'blocked'",
+          "approvedBy": "string | null",
+          "checks": "array of { id, level: 'pass' | 'warn' | 'block', message }",
+          "source": "'ai' | 'manual'",
+          "approveBlocker": "string | null",
+          "rejection": "object { by, reason } (optional)",
+          "ai": "object { feature: 'read' | 'plan', traceId, model, promptVersion, edited: boolean } (optional; only on refunds created from an AI draft)",
+          "history": "array of { at: ISO timestamp, by: user id, role, action: 'created' | 'approved' | 'rejected', traceId (optional), note (optional) }: the audit trail, append-only, written by the server"
+        }
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/refunds",
+    "description": "Create a refund from a reviewed draft. Agents only (403 otherwise). There is no amount field: the server prices from the order and runs every policy check; status is 'blocked' if any check blocks. Returns 201.",
+    "body": {
+      "orderId": "string",
+      "customerEmail": "string",
+      "items": "array of { sku, qty }",
+      "reason": "string",
+      "refundShipping": "boolean",
+      "requestedAmount": "number | null (optional)",
+      "source": "'ai' | 'manual' (optional)",
+      "ai": "object { feature, traceId, model, promptVersion, edited } (optional; the provenance from the read-request / plan-refunds response, kept only when source is 'ai')"
+    },
+    "response": {
+      "refund": "object, same shape as an item of GET /api/refunds"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/refunds/preview",
+    "description": "Price and check a draft without saving it — what the review screen shows on every change.",
+    "body": {
+      "orderId": "string",
+      "customerEmail": "string",
+      "items": "array of { sku, qty }",
+      "reason": "string",
+      "refundShipping": "boolean",
+      "requestedAmount": "number | null (optional)",
+      "source": "'ai' | 'manual' (optional)"
+    },
+    "response": {
+      "checks": "array of { id, level, message }",
+      "amount": "number | null"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/refunds/:id/approve",
+    "description": "Approve a pending refund. 403 if the role doesn't allow it (agent over 100 €, supervisor on their own); 409 if it's blocked or not pending.",
+    "body": {},
+    "response": {
+      "refund": "object, same shape as an item of GET /api/refunds"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/refunds/:id/reject",
+    "description": "Reject a refund: the agent who created it, or a supervisor. 409 if already approved or rejected.",
+    "body": {
+      "reason": "string (optional, max 200)"
+    },
+    "response": {
+      "refund": "object, same shape as an item of GET /api/refunds"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/read-request",
+    "description": "AI: read a customer email or a receipt photo/PDF into a draft. Agents only. Send exactly one of message or file. 413/415 on file limits, 502 { kind: 'invalid_output' | 'upstream' } on model failure, 503 when switched off, 429 over 20 AI calls/min. 429 { kind: 'budget' } once the user has spent their daily AI budget (DAILY_AI_BUDGET_USD, default 1 USD).",
+    "body": {
+      "message": "object { from, subject, body } (optional; body ≤ 5000 chars)",
+      "file": "object { name, mediaType: image/png | image/jpeg | image/webp | application/pdf, data: base64 } (optional; ≤ 3 MB)"
+    },
+    "response": {
+      "report": "object { isRefundRequest, orderId, items, reason, refundShipping, requestedAmount, summary }",
+      "draft": "object, a draft with items { sku, qty, from } (optional; absent when not a refund request)",
+      "unmatched": "array of string (optional)",
+      "checks": "array of check (optional)",
+      "amount": "number | null (optional)",
+      "provenance": "object { feature: 'read' | 'plan', traceId, model, promptVersion }: which AI call produced this; send it back as the draft's ai field"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/ask",
+    "description": "AI: answer a question about orders and refunds as a Server-Sent Events stream (send Accept: text/event-stream). The server first retrieves the records relevant to the question (ids, customer, status, reason, product; all records when nothing matches) and the model sees only those. Events: status, delta { text }, result { citations, invalidCitations, grounded, abstained, retrieved }, done, or error { status, error, kind }. 429 { kind: 'budget' } once the user has spent their daily AI budget (DAILY_AI_BUDGET_USD, default 1 USD).",
+    "body": {
+      "question": "string (≤ 500 chars)",
+      "history": "array of { role: 'user' | 'assistant', content } (optional; last 6 kept)"
+    },
+    "response": {
+      "stream": "text/event-stream"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/plan-refunds",
+    "description": "AI: propose refunds for an instruction (e.g. 'refund every parcel that never arrived'). Agents only. Creates nothing: every proposal is already policy-checked; blocked ones come with reasons. 429 { kind: 'budget' } once the user has spent their daily AI budget (DAILY_AI_BUDGET_USD, default 1 USD).",
+    "body": {
+      "instruction": "string (≤ 300 chars)"
+    },
+    "response": {
+      "proposals": "array of { draft, amount, checks, why }",
+      "blocked": "array of { orderId, why, reasons }",
+      "note": "string | null",
+      "truncated": "boolean (true if the model hit its token limit)",
+      "provenance": "object { feature: 'read' | 'plan', traceId, model, promptVersion }: which AI call produced this; send it back as the draft's ai field"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/feedback",
+    "description": "A 👍/👎 on an AI result, joined to its model call by trace id (Ask: the done frame's traceId; read / plan: provenance.traceId). Any role. Logged as a [feedback] line and counted in /api/ai-metrics.",
+    "body": {
+      "feature": "'read' | 'ask' | 'plan'",
+      "traceId": "string (8–64 chars, letters, digits, dashes)",
+      "rating": "'up' | 'down'",
+      "comment": "string (optional; ≤ 300 chars)"
+    },
+    "response": {
+      "ok": "boolean"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/ai-metrics",
+    "description": "Per AI feature, since the server started: feedback, what happened to AI drafts (created, edited first, approved, rejected) and unusable model outputs. Supervisors only (403 otherwise).",
+    "response": {
+      "features": "object { read, ask, plan }, each { feedback: { up, down }, created, edited, approved, rejected, failures, byModel: { [model]: { created, edited, approved, rejected } } } (byModel compares a canary model with the stable one)"
+    }
+  }
+]

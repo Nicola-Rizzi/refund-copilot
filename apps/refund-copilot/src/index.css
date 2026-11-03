@@ -1,0 +1,8 @@
+@import "../../../packages/ui/src/index.css";
+
+body {
+  margin: 0;
+  background: rgb(var(--surface));
+  color: rgb(var(--text));
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+}
