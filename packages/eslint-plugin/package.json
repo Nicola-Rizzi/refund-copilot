@@ -1,0 +1,14 @@
+{
+  "name": "@refund-copilot/eslint-plugin",
+  "version": "1.2.0",
+  "type": "module",
+  "exports": {
+    ".": "./index.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "peerDependencies": {
+    "eslint": ">=9"
+  }
+}

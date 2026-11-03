@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand:                     109  40 217;
+    --brand-hover:                91  33 182;
+    --brand-foreground:          255 255 255;
+    --brand-accent:              161  69   7;
+    --brand-accent-fg:           255 255 255;
+    --text:                       28  25  23;
+    --text-muted:                113 106 101;
+    --surface:                   250 250 249;
+    --surface-card:              255 255 255;
+    --surface-subtle:            245 245 244;
+    --border:                    214 211 209;
+    --border-focus:              109  40 217;
+    --border-input:              138 132 127;
+    --feedback-error:            185  28  28;
+    --feedback-success:           22 101  52;
+
+    --radius-sm:                 6px;
+    --radius-md:                 10px;
+    --radius-lg:                 14px;
+    --radius-full:               9999px;
+  }
+}
