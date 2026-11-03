@@ -1,5 +1,5 @@
 /**
- * Best-effort client IP for rate limiting. Behind Vercel/Render's proxy the
+ * Best-effort client IP for rate limiting. Behind a hosting platform's proxy the
  * real client address only shows up in x-forwarded-for (the socket sees the
  * proxy's IP), so that header wins when present; direct connections (local
  * dev) fall back to the socket address.

@@ -131,7 +131,6 @@ scripts/
                                                 (needs the ANTHROPIC_API_KEY secret; a few cents a run)
   figma-tokens.yml                           — after tokens.json changes on main: publishes it to Figma as
                                                 variables (needs FIGMA_TOKEN + FIGMA_FILE_KEY; skips without)
-render.yaml                                  — Render blueprint: refund-copilot as one web service, AI_STUB=1
 .claude/skills/docs-sync/                    — agent skill for Rule 4: docs ↔ code check (check-docs.mjs),
                                                 change → doc map, ARCHITECTURE.md publisher (render-md.mjs)
 .claude/skills/ai-feature-change/            — change a prompt/model/AI core: eval case first, prompt version,

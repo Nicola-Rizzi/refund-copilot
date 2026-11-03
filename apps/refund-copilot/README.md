@@ -114,7 +114,7 @@ Real failures, each now covered by a test:
 
 ## Deploy
 
-[`render.yaml`](../../render.yaml) deploys the app to Render as a single service in demo mode, so it needs no API key. To use the real model, add `ANTHROPIC_API_KEY` and remove `AI_STUB`.
+There's no public demo. In production, `npm start` (with `NODE_ENV=production` and a `SESSION_SECRET`) runs one Node process that serves the built UI and the API on one origin, with a strict Content Security Policy, on any Node host. Without `ANTHROPIC_API_KEY` and with `AI_STUB=1`, it runs in demo mode at no cost.
 
 ## Limits, on purpose
 

@@ -31,7 +31,7 @@ npm run demo          # no API key: http://localhost:5174, pick any demo account
 
 What to try, and what each scenario should do: [the scenario table](apps/refund-copilot/README.md#run-it).
 
-Demo mode answers with keyword rules instead of a model, and says so on screen; everything after the model call is the real code. With a key: `ANTHROPIC_API_KEY=... npm run dev`. Deployed with [`render.yaml`](render.yaml), it also runs in demo mode: no API key, no cost, and simple answers by design.
+Demo mode answers with keyword rules instead of a model, and says so on screen; everything after the model call is the real code. With a key: `ANTHROPIC_API_KEY=... npm run dev`.
 
 ## How it stays safe
 

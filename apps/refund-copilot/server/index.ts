@@ -17,7 +17,7 @@ import { createHandlers } from "./lib/handlers.ts";
 import { createStore } from "./lib/refunds.ts";
 import { SECURITY_HEADERS, staticFile } from "./lib/static.ts";
 
-// PORT is what hosts like Render set; API_PORT is the local / e2e override.
+// PORT is what hosting platforms set; API_PORT is the local / e2e override.
 const PORT = Number(process.env.PORT ?? process.env.API_PORT ?? 8788);
 const PRODUCTION = process.env.NODE_ENV === "production";
 const DIST = fileURLToPath(new URL("../dist", import.meta.url));
