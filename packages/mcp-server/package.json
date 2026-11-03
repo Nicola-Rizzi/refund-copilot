@@ -1,0 +1,27 @@
+{
+  "name": "refund-copilot-mcp",
+  "version": "2.0.0",
+  "description": "MCP server exposing a design system's tokens and component APIs to AI agents",
+  "type": "module",
+  "bin": {
+    "refund-copilot-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "eval": "node eval/parser.eval.mjs",
+    "start:http": "node dist/http.js",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "culori": "^4.0.2",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/culori": "^4.0.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

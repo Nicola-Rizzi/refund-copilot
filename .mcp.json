@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "refundCopilot": {
+      "command": "node",
+      "args": [
+        "./packages/mcp-server/dist/index.js"
+      ],
+      "env": {
+        "SHARED_UI_PATH": "./packages/ui/src",
+        "API_CONTRACT_PATH": "./apps/refund-copilot/api.json",
+        "PROMPTS_PATH": "./prompts"
+      }
+    }
+  }
+}

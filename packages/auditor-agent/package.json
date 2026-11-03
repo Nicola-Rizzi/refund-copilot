@@ -1,0 +1,16 @@
+{
+  "name": "@refund-copilot/auditor-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "LangGraph agent that scans for hardcoded hex colors, resolves each to the real token via the project MCP server, and applies the fix only after explicit human approval.",
+  "scripts": {
+    "start": "node src/cli.mjs",
+    "demo": "node src/cli.mjs --dir demo-fixture",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@langchain/langgraph": "^1.4.8",
+    "@langchain/core": "^1.2.3"
+  }
+}
