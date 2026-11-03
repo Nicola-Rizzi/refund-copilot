@@ -1,0 +1,53 @@
+{
+  "name": "refund-copilot-workspace",
+  "version": "0.1.0",
+  "description": "AI refund copilot for e-commerce support: the model reads and proposes, code prices and checks policy, people approve. Plus an MCP server that keeps coding agents on the real design system and API contract.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nicola-Rizzi/refund-copilot.git"
+  },
+  "homepage": "https://github.com/Nicola-Rizzi/refund-copilot#readme",
+  "keywords": [
+    "ai",
+    "llm",
+    "anthropic",
+    "claude",
+    "mcp",
+    "evals",
+    "react",
+    "typescript",
+    "design-system"
+  ],
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "generate-tokens": "npm run generate-tokens --workspace=packages/ui",
+    "verify-component-props": "git diff origin/main...HEAD | node scripts/verify-component-props.js",
+    "verify-endpoint-fields": "npm run build --workspace=packages/mcp-server && node scripts/verify-endpoint-fields.js",
+    "lint": "eslint .",
+    "test": "npm run test --workspaces --if-present",
+    "test:scripts": "tsc -p scripts/tsconfig.json && node --test scripts/test/*.test.mjs",
+    "dev": "npm run build --workspace=packages/mcp-server && concurrently -n api,web -c yellow,cyan \"npm run dev:api --workspace=apps/refund-copilot\" \"npm run dev --workspace=apps/refund-copilot\"",
+    "dev:refunds": "concurrently -n api,web -c yellow,cyan \"npm run dev:api --workspace=apps/refund-copilot\" \"npm run dev --workspace=apps/refund-copilot\"",
+    "demo": "concurrently -n api,web -c yellow,cyan \"npm run dev:api:stub --workspace=apps/refund-copilot\" \"npm run dev --workspace=apps/refund-copilot\"",
+    "figma:publish-tokens": "node scripts/figma-publish-tokens.js"
+  },
+  "overrides": {
+    "storybook": "^10.4.1"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.137.0",
+    "@figma/rest-api-spec": "^0.47.0",
+    "@refund-copilot/eslint-plugin": "*",
+    "@typescript-eslint/parser": "^8.58.2",
+    "concurrently": "^9.1.0",
+    "eslint": "^10.4.1",
+    "storybook": "^10.4.1",
+    "typescript": "~6.0.2"
+  }
+}
