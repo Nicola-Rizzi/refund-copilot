@@ -10,7 +10,7 @@ async function shot(page: Page, name: string, fullPage = false) {
   await page.evaluate("window.scrollTo(0, 0)")
   await page.screenshot({ path: `${OUT}${name}.png`, fullPage, animations: "disabled" })
 }
-test.use({ viewport: { width: 1280, height: 860 } })
+test.use({ viewport: { width: 1280, height: 1220 } })   // tall enough for a whole draft: amount, checks and the Create button
 
 function demo(name: string) {
   const raw = readFileSync(new URL(`../demo-requests/${name}`, import.meta.url), "utf8")
